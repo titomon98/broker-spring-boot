@@ -9,7 +9,7 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private static final String SECRET = "Esto puede ser una variable e entorno por seguridad";
+    private static final String SECRET = "Esto puede ser una variable e entorno por seguridad"; //Requiere minimo 32 caracteres
     private static final long EXPIRATION_MS = 1000 * 60 * 60; // 1 hora
 
     private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());

@@ -46,7 +46,8 @@ public class logServiceImplementation implements logService {
 
     @Override
     public Log createLog(Log log) {
-        String url = log.getRequest();
+        String API_BASE_PRODUCTOS = "http://localhost:3000";
+        String url = API_BASE_PRODUCTOS + log.getRequest();
         String body = log.getBody();
 
         if (url == null || url.isBlank()) {
@@ -69,8 +70,21 @@ public class logServiceImplementation implements logService {
                 responseEntity = restTemplate.getForEntity(url, String.class);
             }
 
+            //Extraer el atributo "message" para guardarlo en rawResponse
+            String message = null;
+
+            try {
+                JsonNode nodeResponse = new ObjectMapper()
+                        .readTree(responseEntity.getBody());
+                message = nodeResponse.get("tipoproducto").get("tipo").asText(); //message porque asi viene en la respuesta
+            }
+            catch (JsonProcessingException e) {
+                message = e.getMessage();
+            }
+
             log.setResponse(responseEntity.getBody());
             log.setCode(responseEntity.getStatusCode().value());
+            log.setRawResponse(message);
 
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             log.setResponse(e.getResponseBodyAsString());

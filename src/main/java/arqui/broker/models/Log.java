@@ -20,6 +20,8 @@ public class Log {
     private String response;
     @Column(columnDefinition = "LONGTEXT")
     private String body;
+    @Column(columnDefinition = "LONGTEXT")
+    private String rawResponse;
     private Integer code;
     @Column(updatable = false)
     private LocalDateTime createdAt;
@@ -77,5 +79,13 @@ public class Log {
         } catch (JsonProcessingException e) {
             this.body = body.toString();
         }
+    }
+
+    public String getRawResponse() {
+        return rawResponse;
+    }
+
+    public void setRawResponse(String rawResponse) {
+        this.rawResponse = rawResponse;
     }
 }
