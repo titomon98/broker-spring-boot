@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface logService {
+    List<Log> findAll();
     Optional<Log> getLogById(Integer id);
     Log createLog(Log log);
-    List<Log> findAll();
 }

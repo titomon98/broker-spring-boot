@@ -2,8 +2,16 @@ package arqui.broker.services;
 
 import arqui.broker.models.Log;
 import arqui.broker.repositories.logRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
@@ -38,23 +46,36 @@ public class logServiceImplementation implements logService {
 
     @Override
     public Log createLog(Log log) {
-        //Broker solo registra request y response
-        //Unicamente vamos a tener la request
-        String request = log.getRequest();
-        //Hasta que hacemos la llamada a la API Node, podemos maquetar la response
-        String url = "http://localhost:3000/api/tipo-producto";
+        String url = log.getRequest();
+        String body = log.getBody();
 
-        Map<String, String> requestBody = new HashMap<>();
-        requestBody.put("tipo", request);
+        if (url == null || url.isBlank()) {
+            throw new RuntimeException("El campo 'request' (url) es requerido");
+        }
 
-        //Llamada a la API
         RestTemplate restTemplate = new RestTemplate();
 
-        ResponseEntity<String> responseEntity =
-                restTemplate.getForEntity(url, String.class);
-        //Tomar los datos de respuesta para guardar aqui
-        log.setResponse(responseEntity.getBody());
-        log.setCode(responseEntity.getStatusCode().value());
+        try {
+            ResponseEntity<String> responseEntity;
+
+            if (body != null && !body.isBlank()) {
+                // Si hay body → POST
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                HttpEntity<String> entity = new HttpEntity<>(body, headers);
+                responseEntity = restTemplate.postForEntity(url, entity, String.class);
+            } else {
+                // Si no hay body → GET
+                responseEntity = restTemplate.getForEntity(url, String.class);
+            }
+
+            log.setResponse(responseEntity.getBody());
+            log.setCode(responseEntity.getStatusCode().value());
+
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            log.setResponse(e.getResponseBodyAsString());
+            log.setCode(e.getStatusCode().value());
+        }
 
         return logRepository.save(log);
     }

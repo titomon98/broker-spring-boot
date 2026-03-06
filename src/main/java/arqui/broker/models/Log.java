@@ -1,6 +1,11 @@
 package arqui.broker.models;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name="logs")
@@ -11,7 +16,24 @@ public class Log {
     private Integer id;
     private String request;
     private String response;
+    @Column(columnDefinition = "TEXT")
+    private String body;
     private Integer code;
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
     public Integer getId() {
         return id;
@@ -43,5 +65,15 @@ public class Log {
 
     public void setCode(Integer code) {
         this.code = code;
+    }
+
+    public String getBody() { return body; }
+    @JsonSetter("body")
+    public void setBody(Object body) {
+        try {
+            this.body = new ObjectMapper().writeValueAsString(body);
+        } catch (JsonProcessingException e) {
+            this.body = body.toString();
+        }
     }
 }

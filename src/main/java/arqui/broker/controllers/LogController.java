@@ -2,6 +2,7 @@ package arqui.broker.controllers;
 
 import arqui.broker.models.Log;
 import arqui.broker.services.logService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,8 +27,8 @@ public class LogController {
         return logService.findAll();
     }
 
-    @PostMapping("/create")
-    public Log createLog(@RequestBody Log log) {
-        return logService.createLog(log);
+    @PostMapping
+    public ResponseEntity<Log> create(@RequestBody Log log) {
+        return ResponseEntity.status(201).body(logService.createLog(log));
     }
 }
