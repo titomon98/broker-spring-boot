@@ -14,9 +14,11 @@ public class Log {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @Column(columnDefinition = "LONGTEXT")
     private String request;
+    @Column(columnDefinition = "LONGTEXT")
     private String response;
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "LONGTEXT")
     private String body;
     private Integer code;
     @Column(updatable = false)
